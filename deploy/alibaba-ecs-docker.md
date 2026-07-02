@@ -12,7 +12,7 @@ This is the stable deployment path. Do not use Cloud Shell as the hosting surfac
 ## 1. Build a release bundle locally
 
 ```bash
-cd aionexo/project/erinys-care-memory
+cd erinys-care-memory
 chmod +x scripts/*.sh
 scripts/release_bundle.sh
 ```

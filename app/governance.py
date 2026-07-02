@@ -114,7 +114,7 @@ SEED_MEMORIES: tuple[Memory, ...] = (
         2,
         2,
         contradicts="m004",
-        decision_note="Demote: conflicts with low-sodium care guidance.",
+        decision_note="Conflict: contradicts low-sodium care guidance.",
     ),
     Memory(
         "m008",

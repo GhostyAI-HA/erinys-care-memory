@@ -240,11 +240,21 @@ async function resetMemory() {
   }
 }
 
-runButton.addEventListener("click", () => runBenchmark({ live: true }));
-saveMemoryButton.addEventListener("click", saveMemoryAndRerun);
-resetButton.addEventListener("click", resetMemory);
-demoRunButton.addEventListener("click", () => runBenchmark({ live: true }));
-demoSaveButton.addEventListener("click", saveMemoryAndRerun);
+function guard(action) {
+  return () =>
+    Promise.resolve()
+      .then(action)
+      .catch((error) => {
+        setLoading(false);
+        setDemoStatus(`Request failed: ${error.message}`);
+      });
+}
+
+runButton.addEventListener("click", guard(() => runBenchmark({ live: true })));
+saveMemoryButton.addEventListener("click", guard(saveMemoryAndRerun));
+resetButton.addEventListener("click", guard(resetMemory));
+demoRunButton.addEventListener("click", guard(() => runBenchmark({ live: true })));
+demoSaveButton.addEventListener("click", guard(saveMemoryAndRerun));
 demoDecisionButton.addEventListener("click", () => {
   setDemoStatus("Inspecting ERINYS memory decisions.");
   focusDemo(".decision-panel", "decisions");

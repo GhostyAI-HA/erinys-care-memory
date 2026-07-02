@@ -42,7 +42,7 @@ Numbers from the live smoke test on the public ECS deployment, 2026-07-02 (full 
 |---|---|
 | Decision states | **4** — every memory labeled `selected` / `conflicted` / `demoted` / `blocked` |
 | Sensitive data | **3** synthetic private identifiers blocked before Qwen — **0 leaked** in the governed answer |
-| Prompt size | ~**63% fewer prompt tokens** vs Raw Memory in the demo benchmark |
+| Prompt size | governed prompt is **smaller than Raw Memory** — it drops blocked and demoted memories (~25% fewer tokens by a rough char-based estimate) |
 | Live providers | `no_memory` / `raw_memory` / `erinys_qwen` all verified on `qwen_cloud` |
 | Runtime memory | save → rerun → the answer changes; persists across reload |
 
@@ -64,7 +64,7 @@ Scenario: a caregiver asks for **tomorrow's clinic-visit plan** (synthetic famil
 
 <p align="center">
   <img src="docs/assets/ui-benchmark-erinys-qwen.png" alt="Live UI: three-mode benchmark with ERINYS + Qwen highlighted" width="840">
-  <br><em>Three-column benchmark in the live UI — ERINYS + Qwen highlighted, ~63% token-reduction banner visible.</em>
+  <br><em>Three-column benchmark in the live UI — ERINYS + Qwen highlighted, with a smaller governed prompt.</em>
 </p>
 
 <p align="center">

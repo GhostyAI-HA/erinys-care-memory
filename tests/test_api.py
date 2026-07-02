@@ -13,7 +13,11 @@ class ApiPayloadTest(unittest.TestCase):
         body = benchmark_payload("Draft the care plan.", use_live_qwen=False)
         self.assertEqual(len(body["runs"]), 3)
         self.assertGreaterEqual(body["governance_counts"]["blocked"], 4)
-        self.assertGreaterEqual(body["token_reduction_percent"], 60)
+        # Token estimate is derived from the actual prompt lengths, so the
+        # governed prompt must be genuinely smaller than the raw one.
+        self.assertGreater(body["token_reduction_percent"], 0)
+        by_mode = {run["mode"]: run["prompt_tokens_estimate"] for run in body["runs"]}
+        self.assertLess(by_mode["erinys_qwen"], by_mode["raw_memory"])
 
 
 if __name__ == "__main__":

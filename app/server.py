@@ -32,11 +32,6 @@ APP_DIR = Path(__file__).resolve().parent
 STATIC_DIR = APP_DIR / "static"
 MAX_BODY_BYTES = 65536
 ALL_MODES = {"no_memory", "raw_memory", "erinys_qwen"}
-TOKEN_BASELINES = {
-    "no_memory": 77,
-    "raw_memory": 806,
-    "erinys_qwen": 299,
-}
 STATIC_CONTENT_TYPES = {
     ".css": "text/css; charset=utf-8",
     ".js": "text/javascript; charset=utf-8",
@@ -204,7 +199,7 @@ def benchmark_payload(user_request: str, use_live_qwen: bool = True, live_modes:
             if mode == "raw_memory"
             else [memory.id for memory in selected_memories(decisions)]
         )
-        token_estimate = estimate_demo_tokens(mode, user_request, memories_for_run, decisions)
+        token_estimate = estimate_tokens(prompts[mode])
         runs.append(
             BenchmarkRun(
                 mode=mode,
@@ -252,21 +247,6 @@ def normalize_completion(result: tuple[str, str | None]) -> QwenCompletion:
     answer, error_message = result
     provider = "qwen_cloud" if answer else "demo_fallback"
     return answer, error_message, provider
-
-
-def estimate_demo_tokens(mode: str, user_request: str, memories_for_run: list, decisions: list) -> int:
-    request_extra = max(0, estimate_tokens(user_request) - estimate_tokens(DEFAULT_REQUEST))
-    runtime_extra = sum(estimate_tokens(memory.text) for memory in memories_for_run if memory.id.startswith("u"))
-    selected_runtime_extra = sum(
-        estimate_tokens(decision.memory.text)
-        for decision in decisions
-        if decision.status == "selected" and decision.memory.id.startswith("u")
-    )
-    if mode == "raw_memory":
-        return TOKEN_BASELINES[mode] + request_extra + runtime_extra
-    if mode == "erinys_qwen":
-        return TOKEN_BASELINES[mode] + request_extra + selected_runtime_extra
-    return TOKEN_BASELINES[mode] + request_extra
 
 
 def serialize_run(run: BenchmarkRun) -> dict:
