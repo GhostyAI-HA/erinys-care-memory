@@ -19,6 +19,14 @@ class ApiPayloadTest(unittest.TestCase):
         by_mode = {run["mode"]: run["prompt_tokens_estimate"] for run in body["runs"]}
         self.assertLess(by_mode["erinys_qwen"], by_mode["raw_memory"])
 
+    def test_benchmark_exposes_prompt_private_id_proof(self):
+        body = benchmark_payload("Draft the care plan.", use_live_qwen=False)
+        by_mode = {run["mode"]: run for run in body["runs"]}
+
+        self.assertEqual(by_mode["no_memory"]["prompt_private_ids"], [])
+        self.assertGreaterEqual(len(by_mode["raw_memory"]["prompt_private_ids"]), 3)
+        self.assertEqual(by_mode["erinys_qwen"]["prompt_private_ids"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -26,7 +26,7 @@ const comparisonTourSteps = [
   {
     id: "raw-memory",
     selector: ".raw_memory",
-    message: "2 Raw Memory: detailed, but stale context and private IDs enter the answer.",
+    message: "2 Raw Memory: detailed, but stale context and private IDs enter the prompt.",
   },
   {
     id: "decision-layer",
@@ -132,10 +132,17 @@ function modeTitle(mode) {
 
 function renderRun(run) {
   document.querySelector(`#${run.mode}_answer`).textContent = run.answer;
+  document.querySelector(`#${run.mode}_prompt_proof`).textContent = promptProofLabel(run);
   const provider = providerLabel(run);
   const error = run.provider_error && run.mode === "erinys_qwen" ? ` / ${run.provider_error}` : "";
   document.querySelector(`#${run.mode}_meta`).textContent =
     `Prompt tokens (est.) ~${run.prompt_tokens_estimate} / ${provider}${error}`;
+}
+
+function promptProofLabel(run) {
+  const ids = run.prompt_private_ids ?? [];
+  if (ids.length === 0) return "Prompt proof: 0 private IDs sent to Qwen.";
+  return `Prompt proof: raw prompt contains ${ids.join(", ")}.`;
 }
 
 function providerLabel(run) {
@@ -185,6 +192,7 @@ async function runBenchmark({ live = true, focus = true } = {}) {
     if (focus) focusDemo(".controls");
     for (const mode of ["no_memory", "raw_memory", "erinys_qwen"]) {
       document.querySelector(`#${mode}_answer`).textContent = `${modeTitle(mode)} is running...`;
+      document.querySelector(`#${mode}_prompt_proof`).textContent = "Prompt proof: checking Qwen context...";
     }
     const data = await fetchJson(appUrl("run/benchmark"), {
       method: "POST",

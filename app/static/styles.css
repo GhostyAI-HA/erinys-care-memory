@@ -660,6 +660,30 @@ pre {
   font: 700 15px/1.48 Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
+.prompt-proof {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #cfe0dc;
+  border-radius: 9px;
+  background: #f6fbfa;
+  color: #244154;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.36;
+}
+
+.raw_memory .prompt-proof {
+  border-color: #efcac3;
+  background: #fff0ed;
+  color: var(--danger);
+}
+
+.erinys_qwen .prompt-proof {
+  border-color: #bdebe0;
+  background: #e5f8f1;
+  color: #087a5f;
+}
+
 footer {
   margin-top: 10px;
   color: var(--blue);

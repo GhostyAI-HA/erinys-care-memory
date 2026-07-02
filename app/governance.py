@@ -21,6 +21,7 @@ DEFAULT_REQUEST = (
     "Include timing, transport, what to bring, questions to ask, and what not to expose. "
     "If you lack the memory, say what cannot be known instead of giving a generic checklist."
 )
+PRIVATE_IDS = ("SYNTH-INSURANCE-9001", "SYNTH-PORTAL-4420", "SYNTH-DOOR-1122")
 
 
 @dataclass(frozen=True)
@@ -51,6 +52,7 @@ class BenchmarkRun:
     used_memories: list[str]
     memory_decisions: list[MemoryDecision]
     prompt_tokens_estimate: int
+    prompt_private_ids: list[str]
     provider: str
     model: str
     provider_error: str | None = None
@@ -347,6 +349,10 @@ def selected_memories(decisions: list[MemoryDecision]) -> list[Memory]:
 
 def estimate_tokens(text: str) -> int:
     return max(1, round(len(text) / 4))
+
+
+def private_ids_in(text: str) -> list[str]:
+    return [identifier for identifier in PRIVATE_IDS if identifier in text]
 
 
 def context_for(memories: list[Memory]) -> str:
