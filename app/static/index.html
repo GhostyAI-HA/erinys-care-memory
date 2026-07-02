@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google" content="notranslate" />
+    <title>ERINYS CareDog</title>
+    <link
+      rel="preload"
+      as="image"
+      href="static/assets/erinys-care-dog-hero-960.webp"
+      imagesrcset="static/assets/erinys-care-dog-hero-640.webp 640w, static/assets/erinys-care-dog-hero-960.webp 960w"
+      imagesizes="(max-width: 720px) 92vw, (max-width: 1350px) 42vw, 520px"
+      type="image/webp"
+      fetchpriority="high"
+    />
+    <link rel="stylesheet" href="static/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="demo-dock" aria-label="Live demo controls">
+        <div class="demo-dock-copy">
+          <strong>Live app demo</strong>
+          <span id="demoStatus">Ready: run the real benchmark, save memory, then inspect decisions.</span>
+        </div>
+        <div class="demo-dock-actions">
+          <button id="demoRunButton" class="primary" type="button">1 Run live benchmark</button>
+          <button id="demoSaveButton" class="primary" type="button">2 Save memory + rerun</button>
+          <button id="demoDecisionButton" class="secondary" type="button">3 Show decisions</button>
+        </div>
+      </section>
+
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Track 1 MemoryAgent / Global AI Hackathon with Qwen Cloud</p>
+          <h1>ERINYS CareDog</h1>
+          <p class="tagline">Watches over family health before Qwen answers.</p>
+          <p class="hero-summary">
+            CareDog watches appointments, transport needs, care routines, and privacy risks.
+            ERINYS keeps the safe current memory. Qwen turns it into the plan.
+          </p>
+          <div class="proof-row" aria-label="Deployment proof">
+            <span>Alibaba Cloud ECS</span>
+            <span>Docker public demo</span>
+            <span id="heroModel">Qwen Cloud live</span>
+          </div>
+        </div>
+
+        <div class="architecture-card" aria-label="System architecture">
+          <div class="architecture-title">How the CareDog works</div>
+          <div class="architecture-flow">
+            <span>Family question</span>
+            <span>Alibaba ECS</span>
+            <span>ERINYS memory watch</span>
+            <span>Qwen answer</span>
+          </div>
+          <p>ERINYS watches family health memory before Qwen sees the prompt.</p>
+        </div>
+
+        <div class="hero-visual" aria-label="ERINYS CareDog and live status">
+          <picture class="care-dog">
+            <source
+              type="image/webp"
+              srcset="static/assets/erinys-care-dog-hero-640.webp 640w, static/assets/erinys-care-dog-hero-960.webp 960w"
+              sizes="(max-width: 720px) 92vw, (max-width: 1350px) 42vw, 520px"
+            />
+            <img
+              src="static/assets/erinys-care-dog-hero-960.png"
+              alt="ERINYS CareDog"
+              width="960"
+              height="685"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </picture>
+          <div class="status-card">
+            <span id="liveDot" class="live-dot"></span>
+            <div>
+              <strong id="modelLabel">Qwen Cloud</strong>
+              <small id="healthLabel">Checking live connection...</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="cloud-proof" aria-label="Alibaba Cloud proof">
+        <div>
+          <span>Cloud proof</span>
+          <strong id="runtimeLabel">Running on Alibaba Cloud ECS in Singapore</strong>
+        </div>
+        <div>
+          <span>Public endpoint</span>
+          <strong>https://hack.aionexo.com/GAI-HS/</strong>
+        </div>
+        <div>
+          <span>Health signal</span>
+          <strong id="liveProofLabel">Waiting for /health...</strong>
+        </div>
+        <div>
+          <span>Decision layer</span>
+          <strong>CareDog watches over health memory before generation</strong>
+        </div>
+      </section>
+
+      <section class="scenario">
+        <div>
+          <h2>Family Health Watch</h2>
+          <p>
+            A family asks for tomorrow's clinic visit plan. The memory contains helpful care details,
+            stale routines, contradictions, and private identifiers. CareDog decides what Qwen should trust.
+          </p>
+        </div>
+        <div class="scenario-callout">
+          <strong>Like a care dog watching over the family.</strong>
+          <span>No memory forgets context. Raw memory overshares. CareDog gives Qwen only the safe current truth.</span>
+        </div>
+      </section>
+
+      <section class="tech-strip" aria-label="Technical proof points">
+        <span>Persistent memory</span>
+        <span>Timely forgetting</span>
+        <span>Private-ID blocking</span>
+        <span>Governed prompt</span>
+        <span>Qwen qwen3.7-plus</span>
+        <span>Auditable answer</span>
+      </section>
+
+      <section class="controls">
+        <label for="requestInput">Prompt</label>
+        <textarea id="requestInput" rows="3"></textarea>
+        <div class="control-row">
+          <button id="runButton" class="primary" type="button">Run ERINYS live benchmark</button>
+          <button id="resetButton" class="secondary" type="button">Reset saved memory</button>
+        </div>
+      </section>
+
+      <section class="comparison-banner">
+        <div>
+          <strong>Same request. Three memory strategies.</strong>
+          <span id="tokenBadge">Waiting for benchmark...</span>
+        </div>
+      </section>
+
+      <section class="answer-grid" id="answerGrid">
+        <article class="answer-card no_memory">
+          <header>
+            <span class="index">1</span>
+            <div>
+              <h2>No Memory</h2>
+              <p>Qwen without personal memory context</p>
+            </div>
+          </header>
+          <div class="pill neutral">Baseline</div>
+          <ul class="bullets">
+            <li>Cannot know exact timing</li>
+            <li>Cannot know transport constraints</li>
+            <li>Asks for missing facts</li>
+          </ul>
+          <h3>Answer</h3>
+          <pre id="no_memory_answer">Run the benchmark to generate the baseline.</pre>
+          <footer id="no_memory_meta">Prompt tokens (est.) -</footer>
+        </article>
+
+        <article class="answer-card raw_memory">
+          <header>
+            <span class="index">2</span>
+            <div>
+              <h2>Raw Memory</h2>
+              <p>All retrieved memories passed directly</p>
+            </div>
+          </header>
+          <div class="pill danger">Unsafe</div>
+          <ul class="bullets danger-list">
+            <li>Confident but conflicted</li>
+            <li>Private IDs may leak</li>
+            <li>Stale route enters plan</li>
+          </ul>
+          <h3>Answer</h3>
+          <pre id="raw_memory_answer">Run the benchmark to see raw prompt stuffing.</pre>
+          <footer id="raw_memory_meta">Prompt tokens (est.) -</footer>
+        </article>
+
+        <aside class="why-panel">
+          <h2>Why ERINYS changes the answer</h2>
+          <div class="why-step select">Select current care</div>
+          <div class="why-step demote">Demote stale routine</div>
+          <div class="why-step block">Block private IDs</div>
+        </aside>
+
+        <article class="answer-card erinys_qwen">
+          <header>
+            <span class="index">3</span>
+            <div>
+              <h2>ERINYS + Qwen</h2>
+              <p>ERINYS filters memory before Qwen</p>
+            </div>
+          </header>
+          <div class="pill success">Governed & safe</div>
+          <ul class="bullets success-list">
+            <li>Exact current plan</li>
+            <li>Blocks private IDs</li>
+            <li>Explains memory decisions</li>
+          </ul>
+          <h3>Answer</h3>
+          <pre id="erinys_qwen_answer">Run the benchmark to generate governed memory output.</pre>
+          <footer id="erinys_qwen_meta">Prompt tokens (est.) -</footer>
+        </article>
+      </section>
+
+      <section class="lower-grid">
+        <article class="memory-panel">
+          <header>
+            <h2>Persistent Memory</h2>
+            <span id="persistedBadge">0 saved</span>
+          </header>
+          <p>Save a new care instruction, then rerun Qwen with ERINYS governance.</p>
+          <input id="memoryInput" value="Ask reception to arrange wheelchair assistance at the north entrance before check-in." />
+          <button id="saveMemoryButton" class="primary" type="button">Save memory + rerun</button>
+        </article>
+
+        <article class="decision-panel">
+          <header>
+            <h2>Memory Decisions</h2>
+            <div id="decisionCounts" class="count-row"></div>
+          </header>
+          <div id="decisionList" class="decision-list">
+            <p class="muted">Run the benchmark to see selected, conflicted, demoted, and blocked memories.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+    <script src="static/app.js"></script>
+  </body>
+</html>

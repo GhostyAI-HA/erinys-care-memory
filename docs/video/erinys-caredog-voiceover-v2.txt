@@ -1,0 +1,58 @@
+A family care assistant cannot just remember everything.
+One stale memory can create the wrong plan.
+One private identifier can leak into an answer.
+And one missing current detail can make the assistant useless.
+
+This is ERINYS CareDog, built by Shun Fujiyoshi, also known as Ghosty.AI, for Track 1: MemoryAgent, in the Global AI Hackathon with Qwen Cloud.
+
+The idea is simple.
+ERINYS governs memory before Qwen generates the answer.
+
+Here is the live app running on Alibaba Cloud ECS.
+The public Docker demo is connected to Qwen Cloud with qwen3.7-plus.
+
+We ask one medical-care question:
+prepare the exact door-to-door plan for tomorrow's clinic visit.
+
+First, No Memory.
+Qwen is cautious, but it cannot know the appointment timing, the transport constraints, or what must be brought.
+
+Second, Raw Memory.
+The answer becomes detailed, but unsafe.
+Old routines and private identifiers enter the plan.
+
+Now ERINYS acts as the memory gate.
+Each memory is classified before Qwen sees the prompt:
+selected, conflicted, demoted, or blocked.
+
+Third, ERINYS plus Qwen.
+Only safe, current care context reaches Qwen.
+The answer becomes specific without exposing private data.
+
+Now we save a new live memory:
+ask reception to arrange wheelchair assistance at the north entrance.
+
+The benchmark runs again.
+The new memory can influence the answer, but only after ERINYS governance.
+
+The Memory Decisions panel is the proof.
+Current care is selected.
+Stale routines are demoted.
+Private identifiers are blocked.
+The system does not just remember more.
+It controls what should shape the next answer.
+
+This is the architecture.
+Candidate memories enter ERINYS.
+ERINYS applies governance rules.
+Only selected memory becomes the prompt sent to Qwen.
+The rest stays visible as an audit trail.
+
+The future is family health memory:
+hospital visits, checkups, medication notes, and calendars.
+For medical care, the value is not remembering everything.
+The value is choosing the right memory for the current moment.
+
+ERINYS governs memory.
+Qwen generates the answer.
+Memory quality is a decision layer.
