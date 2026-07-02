@@ -31,11 +31,11 @@ Created for the Qwen Cloud hackathon demo on 2026-07-01.
 - Qwen model is configured as `qwen3.7-plus`.
 - Qwen live key is installed, so `qwen_live_configured` is currently `true`.
 - Verified providers: `no_memory:qwen_cloud`, `raw_memory:qwen_cloud`, `erinys_qwen:qwen_cloud`.
-- Governed-prompt token reduction: `~25%` vs raw memory (rough char/4 estimate, not a measured provider token count).
+- Governed-prompt token reduction: `~28%` vs raw memory (rough char/4 estimate, not a measured provider token count).
 
 ## Latest smoke test
 
-Verified at `2026-07-02 00:20:37 JST`.
+Verified at `2026-07-03 00:31:38 JST`.
 
 - Public `/health`: pass.
 - Public HTML shell and static assets: pass.
@@ -47,7 +47,7 @@ Verified at `2026-07-02 00:20:37 JST`.
 - Public `/run/benchmark`: pass after pressing the demo run button.
 - Qwen providers: `no_memory:qwen_cloud`, `raw_memory:qwen_cloud`, `erinys_qwen:qwen_cloud`.
 - Qwen errors: none.
-- Prompt-token reduction: `~25%` (rough char/4 estimate of the governed vs raw prompt).
+- Prompt-token reduction: `~28%` (rough char/4 estimate of the governed vs raw prompt).
 - UI screenshots:
   - `/private/tmp/erinys-public-fast-start.png`
   - `/private/tmp/erinys-public-fast-after-save.png`

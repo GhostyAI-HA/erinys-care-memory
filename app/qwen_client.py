@@ -7,8 +7,8 @@ from urllib import error, request
 
 DEFAULT_BASE_URL = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
 DEFAULT_MODEL = "qwen3.7-plus"
-DEFAULT_MAX_TOKENS = 360
-DEFAULT_TIMEOUT_SECONDS = 65
+DEFAULT_MAX_TOKENS = 240
+DEFAULT_TIMEOUT_SECONDS = 90
 
 
 class QwenClient:

@@ -10,6 +10,7 @@ out="${1:-/tmp/${name}.tgz}"
 umask 077
 tar --exclude ".venv" --exclude ".data" --exclude "__pycache__" --exclude ".pytest_cache" \
   --exclude ".env" --exclude ".env.*" --exclude ".git" \
+  --exclude ".versions" --exclude "docs" --exclude "submissions" \
   -czf "$out" .
 shasum -a 256 "$out"
 echo "$out"
