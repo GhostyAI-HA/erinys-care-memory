@@ -1,11 +1,6 @@
-.env
-.venv
-.pytest_cache
-.ruff_cache
-__pycache__
+__pycache__/
+.pytest_cache/
+.data/
+.venv/
 *.pyc
-data/demo/runtime_memory.json
-web/dist
-web/node_modules
-web/.env
-web/.env.local
+

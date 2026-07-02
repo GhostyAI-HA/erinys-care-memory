@@ -1,162 +1,180 @@
-# Track 1: ERINYS Care Memory
+<p align="center">
+  <img src="docs/assets/hero-banner.png" alt="ERINYS CareDog — Memory / Health Care, Track 1 MemoryAgent" width="840">
+</p>
 
-ERINYS Care Memory is a MemoryAgent that decides what Qwen should trust.
+<h1 align="center">ERINYS CareDog</h1>
 
-This repository is self-contained for judging. It includes a compact ERINYS
-policy runtime that reproduces the memory-governance behavior used in the demo:
-select current memories, demote stale memories, mark contradictions, block
-private identifiers, and send only selected context to Qwen Cloud.
+<p align="center"><strong>ERINYS governs memory. Qwen generates the answer.</strong></p>
 
-## Core Claim
+<p align="center">
+  <img src="https://img.shields.io/badge/License-MIT-2ea44f" alt="License: MIT">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/Docker-containerized-2496ED?logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Qwen%20Cloud-qwen3.7--plus-615CED" alt="Qwen Cloud qwen3.7-plus">
+  <img src="https://img.shields.io/badge/Alibaba%20Cloud-ECS%20Singapore-FF6A00" alt="Alibaba Cloud ECS Singapore">
+</p>
 
-Long-running assistants need more than storage. They need memory governance:
+<p align="center">
+  <a href="https://hack.aionexo.com/GAI-HS/"><strong>Live Demo</strong></a>
+  &nbsp;·&nbsp;
+  <a href="#proof-at-a-glance">Verified Proof</a>
+  &nbsp;·&nbsp;
+  <a href="#one-prompt-three-memory-strategies">Three-Mode Story</a>
+  &nbsp;·&nbsp;
+  <a href="#architecture">Architecture</a>
+  &nbsp;·&nbsp;
+  <a href="#hackathon">Hackathon</a>
+</p>
 
-- recall critical context
-- demote outdated routines
-- detect contradictions
-- block sensitive identifiers
-- fit only the useful memories into the Qwen context window
+---
 
-## Three-Mode Demo
+## The problem
 
-The same user request is run through three modes:
+A long-running care assistant accumulates months of memories: medication changes, cancelled routines, door codes, insurance numbers. Give the LLM **nothing** and the answer is safe but useless. Give it **everything** and the answer is detailed but dangerous — stale routines resurface, contradictions slip through, private identifiers leak into the prompt.
 
-| Mode | Behavior |
-| --- | --- |
-| No Memory | Admits it cannot know exact timing, transport, or constraints without memory. |
-| Raw Memory | Plausibly mixes stale routines, conflicts, and private identifiers. |
-| ERINYS + Qwen | Uses only selected care context and explains memory decisions. |
+**Memory quality is a decision layer, not a larger context window.** ERINYS CareDog is a Qwen Cloud MemoryAgent that governs which memories should be trusted *before* generation: recall critical context, demote outdated routines, detect contradictions, block sensitive identifiers, and fit only useful memories into the context window.
 
-## Local Backend
+## Proof at a glance
+
+Numbers from the live smoke test on the public ECS deployment, 2026-07-02 (full record: [`deploy/current-alibaba-ecs.md`](deploy/current-alibaba-ecs.md)):
+
+| Check | Verified result |
+|---|---|
+| Decision states | **4** — every memory labeled `selected` / `conflicted` / `demoted` / `blocked` |
+| Sensitive data | **3** synthetic private identifiers blocked before Qwen — **0 leaked** in the governed answer |
+| Prompt size | governed prompt is **smaller than Raw Memory** — it drops blocked and demoted memories (~25% fewer tokens by a rough char-based estimate) |
+| Live providers | `no_memory` / `raw_memory` / `erinys_qwen` all verified on `qwen_cloud` |
+| Runtime memory | save → rerun → the answer changes; persists across reload |
+
+## One prompt, three memory strategies
+
+Scenario: a caregiver asks for **tomorrow's clinic-visit plan** (synthetic family-care data — no real patient data). The same prompt runs three ways:
+
+| Mode | What happens | Outcome |
+|---|---|---|
+| **1 · No Memory** | LLM answers with zero context | Safe but incomplete — cannot know timing, transport, or what to bring |
+| **2 · Raw Memory** | Every stored memory is dumped into the prompt | Detailed but unsafe — stale routines, contradictions, and private identifiers can leak |
+| **3 · ERINYS + Qwen** | ERINYS decides; only selected context reaches Qwen | Governed and specific, with an audit trail for every memory |
+
+<p align="center">
+  <img src="docs/assets/proof-three-modes.png" alt="The app proves memory quality changes the answer — three modes compared" width="840">
+</p>
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/assets/ui-benchmark-erinys-qwen.png" alt="Live UI: three-mode benchmark with ERINYS + Qwen highlighted" width="840">
+  <br><em>Three-column benchmark in the live UI — ERINYS + Qwen highlighted, with a smaller governed prompt.</em>
+</p>
+
+<p align="center">
+  <img src="docs/assets/ui-memory-decisions.png" alt="Live UI: Memory Decisions audit list with decision chips" width="840">
+  <br><em>Every memory gets an auditable decision — SELECTED / DEMOTED / CONFLICTED / BLOCKED — plus a persistent runtime-memory panel.</em>
+</p>
+
+<details>
+<summary>One more: the live app first view</summary>
+<p align="center">
+  <img src="docs/assets/ui-first-view.png" alt="Live app first view with CareDog hero" width="840">
+</p>
+</details>
+
+## Architecture
+
+<p align="center">
+  <img src="docs/assets/architecture.png" alt="Architecture: Browser → API → Memory Store → ERINYS governance → Governed Prompt → qwen3.7-plus" width="840">
+</p>
+
+Browser → API → Memory Store → **ERINYS governance** (4 decision states) → Governed Prompt → **qwen3.7-plus**.
+
+- **Backend** — Python standard-library HTTP server (no framework), JSON endpoints
+- **Governance** — deterministic ERINYS policy ([`app/governance.py`](app/governance.py)) scoring sensitivity, staleness, conflict, importance, recency, and relevance
+- **LLM** — Qwen Cloud `qwen3.7-plus` via the DashScope OpenAI-compatible endpoint
+- **Frontend** — vanilla HTML/CSS/JS ([`app/static/`](app/static/)), judge-facing demo UI
+- **Deploy** — Docker on Alibaba Cloud ECS (Singapore, `ap-southeast-1`); deterministic fallback demo mode when no API key (`QWEN_LIVE=0`)
+
+## Quickstart (local, no API key needed)
 
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install -e ".[dev]"
-python -m uvicorn erinys_qwen_agent.api:app --reload
+QWEN_LIVE=0 PORT=5173 python -m app.server
+# open http://127.0.0.1:5173/
 ```
 
-## Run the Demo UI
+`QWEN_LIVE=0` runs the deterministic demo mode — governance decisions and the three-mode benchmark work without any credentials.
 
-With the backend running on port 8000, start the Vite dev server in a second
-terminal:
+## Live mode (Qwen Cloud)
+
+| Variable | Value |
+|---|---|
+| `QWEN_API_KEY` | your DashScope API key |
+| `QWEN_MODEL` | `qwen3.7-plus` |
+| `QWEN_BASE_URL` | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` |
+| `QWEN_LIVE` | `1` |
+| `ERINYS_APP_DATA_DIR` | `/data` |
+
+## Docker
 
 ```bash
-cd web
-npm install
-npm run dev
+docker build -t erinys-care-memory .
+docker run --rm -p 8000:8000 -e QWEN_API_KEY=... -e QWEN_MODEL=qwen3.7-plus \
+  -e QWEN_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1 \
+  -v erinys-care-memory-data:/data erinys-care-memory
 ```
 
-Then open http://127.0.0.1:5173. The dev server proxies `/health`, `/memories`,
-`/run/governance`, and `/run/benchmark` to the backend on `127.0.0.1:8000`.
+## API
 
-## API Surface
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/health` | service + Qwen config status |
+| GET | `/memories` | seed + runtime memories |
+| POST | `/memories` | save a runtime memory |
+| POST | `/run/governance` | memory decisions + selected IDs |
+| POST | `/run/benchmark` | three-mode comparison |
+| DELETE | `/memories/runtime` | reset runtime memories |
+
+## Repository structure
+
+```
+app/
+  server.py          # stdlib HTTP server, JSON endpoints
+  governance.py      # deterministic ERINYS policy — 4 decision states
+  qwen_client.py     # Qwen Cloud client (DashScope OpenAI-compatible)
+  static/            # vanilla HTML/CSS/JS demo UI + CareDog assets
+deploy/              # Alibaba Cloud deployment docs
+docs/assets/         # README images
+scripts/             # deploy, verify, and video/voice tooling
+tests/               # pytest suites
+Dockerfile, compose.yaml
+```
+
+## Deployment docs
+
+- [`deploy/current-alibaba-ecs.md`](deploy/current-alibaba-ecs.md) — live deployment record + verification
+- [`deploy/alibaba-ecs-docker.md`](deploy/alibaba-ecs-docker.md) — primary path: ECS + Docker
+- [`deploy/alibaba-sae-container.md`](deploy/alibaba-sae-container.md) — optional managed-container path
+- [`deploy/alibaba-cloud-shell.md`](deploy/alibaba-cloud-shell.md) — smoke-test only
+
+## Tests
 
 ```bash
-curl http://127.0.0.1:8000/health
-curl http://127.0.0.1:8000/memories
-curl http://127.0.0.1:8000/run/governance
-curl -X POST http://127.0.0.1:8000/memories \
-  -H 'content-type: application/json' \
-  -d '{"text":"Ask reception to arrange wheelchair assistance at the north entrance before check-in.","kind":"event","importance":5,"recency":5}'
-```
-
-`/health` exposes both the Qwen connection and the ERINYS policy runtime.
-`/memories` shows seed memory plus locally persisted demo memory.
-`/run/governance` returns every memory decision plus the selected memory IDs.
-
-## Persistent Memory Proof
-
-The demo is not only a fixed seed comparison. Reviewers can save a new memory,
-rerun the same prompt, reload the app, and see the saved memory reused in the
-ERINYS + Qwen answer.
-
-Runtime memories are written to:
-
-```text
-data/demo/runtime_memory.json
-```
-
-That file is intentionally ignored by Git so local demo state and API keys do
-not enter the public repository.
-
-## Qwen Cloud Live Mode
-
-By default the demo uses a deterministic mock so it is safe to run without credentials.
-For the hackathon video, switch to live Qwen Cloud mode:
-
-```bash
-cp .env.example .env
-```
-
-Then edit `.env` locally:
-
-```bash
-QWEN_API_KEY=<your Qwen Cloud or DashScope API key>
-ERINYS_USE_MOCK_QWEN=false
-QWEN_MODEL=qwen3.7-plus
-```
-
-Restart the backend after editing `.env`. The `/health` endpoint should report:
-
-```json
-{"qwen":{"mode":"live","api_key_configured":true}}
-```
-
-Never commit `.env`. It is ignored by `.gitignore`.
-
-Then call:
-
-```bash
-curl -X POST http://127.0.0.1:8000/run/benchmark \
-  -H 'content-type: application/json' \
-  -d '{"request":"Draft the exact door-to-door plan for tomorrow'\''s clinic visit using only what you remember. Include timing, transport, what to bring, questions to ask, and what not to expose. If you lack the memory, say what cannot be known instead of giving a generic checklist.","scenario":"care_visit"}'
-```
-
-## Verification
-
-```bash
+pip install -r requirements-dev.txt
 python -m pytest
-python -m ruff check src tests
-python -m compileall src
-cd web && npm run build
 ```
 
-## Submission Shape
+Covers governance policy ([`tests/test_governance.py`](tests/test_governance.py)), the API surface ([`tests/test_api.py`](tests/test_api.py)), and the video/voice tooling.
 
-Submit three artifacts together:
+## Hackathon
 
-1. Demo video: show save-memory, three-way comparison, and memory decisions.
-2. Interactive app URL: let judges save one synthetic memory and rerun the comparison.
-3. Public GitHub repo: include source, tests, docs, and deployment notes.
+<p align="center">
+  <img src="docs/assets/title-slide.png" alt="ERINYS CareDog — Memory Governance for Medical Care, Global AI Hackathon with Qwen Cloud, Track 1 MemoryAgent" width="840">
+</p>
 
-For a public frontend build, point Vite at the deployed backend:
+Built for the **Global AI Hackathon Series with Qwen Cloud — Track 1: MemoryAgent**. All care data is synthetic — the blocked identifiers (`SYNTH-INSURANCE-9001`, `SYNTH-PORTAL-4420`, `SYNTH-DOOR-1122`) are fabricated for the benchmark; no real patient data is used.
 
-```bash
-cd web
-VITE_API_BASE_URL=https://<backend-url> npm run build
-```
+## License
 
-Set `ERINYS_ALLOWED_ORIGINS` on the backend to the deployed frontend origin.
+Built by **Ghosty.AI** ([GhostyAI-HA](https://github.com/GhostyAI-HA)), presented by Shun Fujiyoshi. Licensed under the [MIT License](LICENSE).
 
-## Alibaba Cloud Deployment
-
-The recommended judge demo deployment is a single Alibaba Cloud Function Compute
-custom container using `Dockerfile.alibaba`. It serves both the React frontend
-and the FastAPI backend from one public URL, so judges can open the app and the
-browser can call `/health`, `/memories`, `/run/governance`, and `/run/benchmark`
-on the same origin.
-
-```bash
-docker build -f Dockerfile.alibaba -t erinys-care-memory-alibaba:latest .
-```
-
-For a backend-only container, use `Dockerfile.backend`.
-
-See:
-
-```text
-deploy/alibaba-function-compute/README.md
-```
-
-The public repository should include `LICENSE` and must never include `.env`.
+<p align="center"><em>ERINYS governs memory. Qwen generates the answer.</em></p>
