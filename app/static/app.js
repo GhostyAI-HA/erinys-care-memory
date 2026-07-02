@@ -156,18 +156,24 @@ function renderDecisions(decisions, counts) {
   }
 
   const list = document.querySelector("#decisionList");
-  list.innerHTML = "";
+  list.replaceChildren();
   for (const decision of decisions) {
     const item = document.createElement("div");
     item.className = `decision ${decision.status}`;
-    item.innerHTML = `
-      <div>
-        <strong>${decision.memory.id}</strong>
-        <span>${decision.status}</span>
-      </div>
-      <p>${decision.reason}</p>
-      <small>${decision.memory.text}</small>
-    `;
+
+    const head = document.createElement("div");
+    const id = document.createElement("strong");
+    id.textContent = decision.memory.id;
+    const status = document.createElement("span");
+    status.textContent = decision.status;
+    head.append(id, status);
+
+    const reason = document.createElement("p");
+    reason.textContent = decision.reason;
+    const text = document.createElement("small");
+    text.textContent = decision.memory.text;
+
+    item.append(head, reason, text);
     list.append(item);
   }
 }
@@ -185,7 +191,7 @@ async function runBenchmark({ live = true, focus = true } = {}) {
       body: JSON.stringify({
         request: requestInput.value,
         use_live_qwen: live,
-        live_modes: ["erinys_qwen"],
+        live_modes: ["no_memory", "raw_memory", "erinys_qwen"],
       }),
     });
     for (const run of data.runs) renderRun(run);

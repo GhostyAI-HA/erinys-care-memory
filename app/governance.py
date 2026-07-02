@@ -5,7 +5,11 @@ from pathlib import Path
 import json
 import os
 import re
+import threading
 from typing import Literal
+
+
+_RUNTIME_LOCK = threading.Lock()
 
 
 DecisionStatus = Literal["selected", "conflicted", "demoted", "blocked"]
@@ -232,27 +236,35 @@ def load_runtime_memories() -> list[Memory]:
 
 def save_runtime_memory(text: str) -> Memory:
     text = normalize_memory_text(text)
-    memories = load_runtime_memories()
-    memory = Memory(
-        id=f"u{len(memories) + 1:03d}",
-        text=text,
-        kind="runtime_update",
-        importance=5,
-        recency=5,
-        decision_note="Select: user-saved persistent memory from the live demo.",
-    )
-    memories.append(memory)
-    runtime_memory_path().write_text(
-        json.dumps([asdict(item) for item in memories], ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    with _RUNTIME_LOCK:
+        memories = load_runtime_memories()
+        memory = Memory(
+            id=f"u{len(memories) + 1:03d}",
+            text=text,
+            kind="runtime_update",
+            importance=5,
+            recency=5,
+            decision_note="Select: user-saved persistent memory from the live demo.",
+        )
+        memories.append(memory)
+        _atomic_write(
+            runtime_memory_path(),
+            json.dumps([asdict(item) for item in memories], ensure_ascii=False, indent=2),
+        )
     return memory
 
 
 def reset_runtime_memories() -> None:
-    path = runtime_memory_path()
-    if path.exists():
-        path.unlink()
+    with _RUNTIME_LOCK:
+        path = runtime_memory_path()
+        if path.exists():
+            path.unlink()
+
+
+def _atomic_write(path: Path, text: str) -> None:
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
 
 
 def normalize_memory_text(text: str) -> str:
