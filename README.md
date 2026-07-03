@@ -7,6 +7,7 @@
 <p align="center"><strong>ERINYS governs memory. Qwen generates the answer.</strong></p>
 
 <p align="center">
+  <img src="https://github.com/GhostyAI-HA/erinys-care-memory/actions/workflows/ci.yml/badge.svg" alt="CI">
   <img src="https://img.shields.io/badge/License-MIT-2ea44f" alt="License: MIT">
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/Docker-containerized-2496ED?logo=docker&logoColor=white" alt="Docker">
@@ -92,6 +93,31 @@ Browser → API → Memory Store → **ERINYS governance** (4 decision states) �
 - **LLM** — Qwen Cloud `qwen3.7-plus` via the DashScope OpenAI-compatible endpoint
 - **Frontend** — vanilla HTML/CSS/JS ([`app/static/`](app/static/)), judge-facing demo UI
 - **Deploy** — Docker on Alibaba Cloud ECS (Singapore, `ap-southeast-1`); deterministic fallback demo mode when no API key (`QWEN_LIVE=0`)
+
+## Why deterministic, by design
+
+Governance is a fixed policy, not a model call — and that is the point, not a shortcut. The policy does
+not learn and does not reason; it applies rules to the six signals and emits a **reproducible reason for
+every decision**. For medical-shaped memory an auditable policy beats an opaque one: a reviewer can see
+exactly *why* a memory reached the prompt or was kept out, and get the same verdict on a re-run.
+
+Read it as two agents with one contract: **ERINYS is the memory-governance agent, Qwen is the generation
+agent.** ERINYS selects, demotes, and blocks *before* generation; Qwen writes the reply from what survives.
+
+## How it generalizes
+
+The policy is content-agnostic. The four decision states and six signals do not know anything about clinic
+visits — swap the seed memories in [`app/governance.py`](app/governance.py) and the same machine applies to
+another domain. You can try this without editing code: the live app lets you **save your own care memory and
+rerun**, so governance runs against your data, not just the seed set.
+
+## Limitations & what's next
+
+- **No automatic PII detection on free-text input.** Seed memories are pre-labeled, and a memory you save in
+  the app defaults to not-sensitive — so `blocked` works because the sensitivity signal is already attached,
+  not because the app inferred it from raw text. Automatic detection of sensitive content is the next build.
+- **`conflicted` flags, it does not reconcile.** Richer conflict resolution is future work.
+- **Thresholds are global.** Per-domain tuning of the six-signal thresholds is a natural next step.
 
 ## Quickstart (local, no API key needed)
 
